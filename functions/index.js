@@ -12,7 +12,7 @@ exports.telegramWebhook = functions.https.onRequest(async (req, res) => {
 
   if (req.body.message && req.body.message.text === "/start") {
     const chatId = req.body.message.chat.id;
-    const message = "t.me/yarik583_bot/fourdays";
+    const message = "t.me/yarik58_bot/tap";
     console.log(`Sending message to chat ID: ${chatId}`);
 
     try {
