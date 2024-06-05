@@ -1,23 +1,29 @@
 const functions = require("firebase-functions");
 const {Telegraf} = require("telegraf");
 
-const admin = require("firebase-admin");
-admin.initializeApp();
+const bot = new Telegraf(functions.config().telegram.token);
 
-const TELEGRAM_TOKEN = functions.config().telegram.token;
-
-const bot = new Telegraf(TELEGRAM_TOKEN);
-
-bot.command("start", (ctx) => {
-  ctx.reply("t.me/yarik58_bot/tap");
+bot.catch((err, ctx) => {
+  functions.logger.error("[Bot] Error", err);
+  return ctx.reply(`Ooops, encountered an error for ${ctx.updateType}`, err);
 });
 
-exports.telegramWebhook = functions.https.onRequest(async (req, res) => {
+// eslint-disable-next-line max-len
+bot.command("/start", (ctx) => ctx.reply("Hello! Send any message and I will provide a link to my app."));
+
+// eslint-disable-next-line max-len
+bot.on("message", (ctx) => ctx.reply("Check out my app at t.me/yarik58_bot/tap"));
+
+
+exports.echoBot = functions.https.onRequest(async (request, response) => {
+  functions.logger.log("Incoming message", request.body);
   try {
-    await bot.handleUpdate(req.body);
-    res.sendStatus(200);
+    await bot.handleUpdate(request.body, response);
+    if (!response.headersSent) {
+      response.sendStatus(200);
+    }
   } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
+    functions.logger.error("Error handling update", error);
+    response.sendStatus(500);
   }
 });
